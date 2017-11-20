@@ -1,0 +1,28 @@
+{
+  "name": "modexplorer",
+  "version": "1.0.0",
+  "description": "Mod explorer for CurseForge",
+  "main": "src/cli.js",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "clear": "^0.0.1",
+    "cloudscraper": "^1.4.1",
+    "colors": "^1.1.2",
+    "inquirer": "^4.0.0",
+    "window-size": "^1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/macsmac/modexplorer.git"
+  },
+  "author": "macsmac",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/macsmac/modexplorer/issues"
+  },
+  "homepage": "https://github.com/macsmac/modexplorer#readme"
+}

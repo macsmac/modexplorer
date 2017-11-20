@@ -1,0 +1,86 @@
+{
+	"addons": {
+		"url": "mc-addons",
+		"locale": "Аддоны"
+	},
+	"addons_ae2": {
+		"url": "mc-addons/applied-energistics-2",
+		"locale": "Аддоны: Applied Energistics 2"
+	},
+	"addons_bm": {
+		"url": "mc-addons/blood-magic",
+		"locale": "Аддоны: Blood Magic"
+	},
+	"addons_bc": {
+		"url": "mc-addons/addons-buildcraft",
+		"locale": "Аддоны: Build Craft"
+	},
+	"addons_bc": {
+		"url": "mc-addons/addons-industrialcraft",
+		"locale": "Аддоны: Industrial Craft"
+	},
+	"addons_fr": {
+		"url": "mc-addons/addons-forestry",
+		"locale": "Аддоны: Forestry"
+	},
+	"addons_thc": {
+		"url": "mc-addons/addons-thaumcraft",
+		"locale": "Аддоны: Thaumcraft"
+	},
+	"addons_te": {
+		"url": "mc-addons/addons-thermalexpansion",
+		"locale": "Аддоны: Thermal Expansion"
+	},
+	"addons_tc": {
+		"url": "mc-addons/addons-tinkers-construct",
+		"locale": "Аддоны: Tinker's Construct"
+	},
+	"rpg": {
+		"url": "adventure-rpg",
+		"locale": "RPG и Приключения"
+	},
+	"tools": {
+		"url": "armor-weapons-tools",
+		"locale": "Броня, оружия и инструменты"
+	},
+	"cosmetic": {
+		"url": "cosmetic",
+		"locale": "Декоративные"
+	},
+	"food": {
+		"url": "mc-food",
+		"locale": "Еда"
+	},
+	"magic": {
+		"url": "magic",
+		"locale": "Магия"
+	},
+	"maps": {
+		"url": "map-information",
+		"locale": "Миникарты и справочники"
+	},
+	"redstone": {
+		"url": "redstone",
+		"locale": "Редстоун"
+	},
+	"storage": {
+		"url": "storage",
+		"locale": "Хранилище"
+	},
+	"technology": {
+		"url": "technology",
+		"locale": "Технические"
+	},
+	"gen": {
+		"url": "world-gen",
+		"locale": "Генерация мира"
+	},
+	"cores": {
+		"url": "library-api",
+		"locale": "Ядра"
+	},
+	"miscellaneous": {
+		"url": "mc-miscellaneous",
+		"locale": "Вспомогательные"
+	}
+}

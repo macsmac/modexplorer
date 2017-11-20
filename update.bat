@@ -1,2 +1,2 @@
 @echo off
-"./runtime/nodejs/npm.exe" i
+"./runtime/nodejs/npm" i

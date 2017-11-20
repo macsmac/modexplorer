@@ -44,10 +44,10 @@ function fetchPageResults($) {
 	return result;
 }
 
-function fetchFiles($) {
+function fetchFiles(baseLink, $) {
 	return $(".button.button--download.download-button.mg-r-05").map(function(i, e) {
 		const val = JSON.parse(e.attribs["data-action-value"]);
-		return { title: val.FileName, rawLink:  BASE_URI + "mc-mods/applied-energistics-2/download/" + val.ProjectFileID };
+		return { title: val.FileName, rawLink:  baseLink + "/download/" + val.ProjectFileID };
 	});
 }
 
@@ -57,7 +57,7 @@ function searchModCategory(category, version, page, cb) {
 
 function getAllFiles(link, version, cb, _pgc, _pg = 1, _list = []) {
 	$fetch(link + "/files?filter-game-version=" + version + "&page=" + _pg, function($) {
-		const files = fetchFiles($);
+		const files = fetchFiles(link, $);
 		
 		const newPgc = files[0].title;
 

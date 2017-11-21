@@ -52,12 +52,16 @@ function fetchFiles(baseLink, $) {
 	});
 }
 
-function searchModCategory(category, version, page, cb) {
-	$fetch(BASE_URI + "mc-mods/" + category + "?filter-game-version=" + version + "&page=" + page, $ => cb(fetchPageResults($)));
+function searchModCategory(category, version, page, search, cb) {
+	$fetch(
+		BASE_URI + "mc-mods/" + (!search ? category : "search") +
+		 "?filter-game-version=" + version + (!search ? "&page=" : "&minecraft-mc-mods-page=") + page +
+		 (search ? "&search=" + search.replace(/ /g, "-") : ""), 
+		$ => cb(fetchPageResults($)));
 }
 
 function searchMod(mod, version, mcversion, cb) {
-	$fetch(BASE_URI + "search?search=" + mod.replace(/ /g, "-"), function($) {
+	$fetch(BASE_URI + "mc-mods/search?search=" + mod.replace(/ /g, "-") + "&filter-game-version=" + mcversion, function($) {
 		const results = fetchPageResults($);
 
 		const result = results.find(e => e && e.title.toLowerCase() === mod.toLowerCase());

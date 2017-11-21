@@ -27,6 +27,7 @@ function rnd(arr) {
 function mainScreen() {
 	clear();
 	console.log(magic.red);
+	console.log(" - Powered by CurseForge");
 	console.log("=".repeat(size.width));
 
 	inquirer.prompt([
@@ -70,7 +71,7 @@ function categoriesScreen() {
 		{
 			name: "cat",
 			message: "Категория:",
-			choices: [...categories, "[Назад в меню]"],
+			choices: ["[Строка поиска]", ...categories, "[Назад в меню]"],
 			suffix: "",
 			prefix: "",
 			type: "list",
@@ -78,9 +79,30 @@ function categoriesScreen() {
 		}
 	]).then(function(data) {
 		if (data.cat === "[Назад в меню]") return process.nextTick(() => mainScreen());
-
+		else if (data.cat === "[Строка поиска]") return process.nextTick(() => searchScreen());
+ 
 		category = _categories[data.cat];
 		modBrowse(1, category, version);
+	});
+}
+
+function searchScreen(text) {
+	clear();
+	console.log(magic.blue, "\n");
+
+	console.log("[Нажмите enter чтобы выйти]".grey);
+
+	inquirer.prompt([
+		{
+			type: "input",
+			name: "search",
+			message: "Запрос:",
+			prefix: ""
+		}
+	]).then(function(data) {
+		if (data.search === "") return process.nextTick(() => mainScreen());
+
+		modBrowse(1, null, version, data.search);
 	});
 }
 
@@ -128,14 +150,19 @@ function startSignCheck() {
 	async.eachSeries(files, function(file, cb) {
 		console.log("[>]", file);
 
-		zip.getFile("../mods/" + file, "mcmod.info", function(content) {
+		zip.getFile("../mods/" + file, ["mcmod.info", "cccmod.info"], function(content) {
+			if (content != undefined) content = content.toString();
+
 			if (!content) return cb(console.log("Не нашел mcmod.info у", file, "- пропускаем"));
 
-			const modinfo = JSON.parse(content.toString().replace(/(\r\n|\n|\r)/gm,""))[0];
+			let modinfo = Object.create(JSON.parse(content.replace(/(\r\n|\n|\r)/gm,"")));
+	
+			if (modinfo[0]) modinfo = modinfo[0];
+			else modinfo = modinfo.modList[0];
 
 			if (!modinfo.name) return cb(console.log("Нет названия у", file, "- сжигаем на костре"));
 
-			curse.searchMod(modinfo.name, modinfo.version, undefined /* curse.versions[modinfo.mcversion] */, function(link) {
+			curse.searchMod(modinfo.name, modinfo.version, curse.versions[modinfo.mcversion], function(link) {
 				if (!link) return cb(console.log("Не нашел", file, "на CurseForge"));
 
 				signature.generateMD5("../mods/" + file, function(localSignature) {
@@ -154,20 +181,19 @@ function startSignCheck() {
 	});
 }
 
-function modBrowse(page, category, version) {
+function modBrowse(page, category, version, search) {
 	clear();
 	console.log("Загружаю...");
 
-	curse.searchModCategory(category, version, page, function(mods) {
-		clear();
+	function showList(mods) {
 		inquirer.prompt([
 			{
 				name: "mod",
 				message: "Моды " + "[стр. " + page + "]",
 				type: "list",
-				choices: mods.map(e => e.title).concat(
+				choices: mods.map(e => e.title + "| " + e.description.slice(0, size.width - e.title.length - 6).green).concat(
 					[
-						"[Назад в категории]",
+						!search ? "[Назад в категории]" : "[Назад к поиску]",
 						"[<= Пред. стр]",
 						"[След. стр =>]"
 					]
@@ -178,12 +204,18 @@ function modBrowse(page, category, version) {
 			}
 		]).then(function(data) {
 			if (data.mod === "[Назад в категории]") process.nextTick(() => categoriesScreen());
-			else if (data.mod === "[<= Пред. стр]") process.nextTick(() => modBrowse(page - 1, category, version));
-			else if (data.mod === "[След. стр =>]") process.nextTick(() => modBrowse(page + 1, category, version));
-			else fileBrowse(mods.find(e => e.title === data.mod), function() {
-				process.nextTick(() => modBrowse(page, category, version));
+			else if (data.mod === "[<= Пред. стр]") process.nextTick(() => modBrowse(page - 1, category, version, search));
+			else if (data.mod === "[След. стр =>]") process.nextTick(() => modBrowse(page + 1, category, version, search));
+			else if (data.mod === "[Назад к поиску]") process.nextTick(() => searchScreen(search));
+			else fileBrowse(mods.find(e => e.title === data.mod.split("|")[0]), function() {
+				process.nextTick(() => modBrowse(page, category, version, search));
 			});
 		});
+	}
+
+	curse.searchModCategory(category, version, page, search, function(mods) {
+		clear();
+		showList(mods);
 	});
 }
 
@@ -198,19 +230,21 @@ function fileBrowse(mod, cb) {
 				name: "file",
 				message: "Выберите файл для загрузки: ",
 				type: "list",
-				choices: files.map(e => e.title),
+				choices: [...files.map(e => e.title), "[Назад]"],
 				suffix: "",
 				prefix: "",
 				pageSize: size.height - 4
 			}
 		]).then(function(data) {
+			if (data.file === "[Назад]") return cb();
+
 			const filename = "../mods/" + data.file + (data.file.endsWith(".jar") ? "" : ".jar");
 
 			clear();
 			console.log("Скачиваю: " + data.file + "\nСюда: " + filename);
 
 			curse.downloadMod(files.find(e => e.title === data.file).rawLink, filename, cb);
-		}).catch(console.log);
+		});
 	});
 }
 

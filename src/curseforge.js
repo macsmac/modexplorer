@@ -5,6 +5,7 @@ const cloudscraper = require("cloudscraper");
 const cheerio = require("cheerio");
 const https = require("https");
 const fs = require("fs");
+const leven = require("leven");
 
 const BASE_URI = "https://curseforge.com/minecraft/";
 
@@ -55,6 +56,25 @@ function searchModCategory(category, version, page, cb) {
 	$fetch(BASE_URI + "mc-mods/" + category + "?filter-game-version=" + version + "&page=" + page, $ => cb(fetchPageResults($)));
 }
 
+function searchMod(mod, version, mcversion, cb) {
+	$fetch(BASE_URI + "search?search=" + mod.replace(/ /g, "-"), function($) {
+		const results = fetchPageResults($);
+
+		const result = results.find(e => e && e.title.toLowerCase() === mod.toLowerCase());
+
+		if (results.length === 0 || !result)
+			return cb(null);
+
+		getAllFiles(result.rawLink, mcversion, function(files) {
+			const file = files.find(e => e.title.indexOf(version) !== -1);
+
+			if (file) {
+				fetchCDNLink(file.rawLink, cb);
+			} else cb(null);
+		});
+	});
+}
+
 function getAllFiles(link, version, cb, _pgc, _pg = 1, _list = []) {
 	$fetch(link + "/files?filter-game-version=" + version + "&page=" + _pg, function($) {
 		const files = fetchFiles(link, $);
@@ -69,4 +89,4 @@ function getAllFiles(link, version, cb, _pgc, _pg = 1, _list = []) {
 	});
 }
 
-module.exports = { fetchCDNLink, $fetch, fetchPageResults, fetchFiles, getAllFiles, searchModCategory, downloadMod, BASE_URI, versions, categories };
+module.exports = { fetchCDNLink, $fetch, fetchPageResults, fetchFiles, searchMod, getAllFiles, searchModCategory, downloadMod, BASE_URI, versions, categories };

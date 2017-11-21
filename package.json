@@ -4,11 +4,15 @@
   "description": "Mod explorer for CurseForge",
   "main": "src/cli.js",
   "dependencies": {
+    "async": "^2.6.0",
     "cheerio": "^1.0.0-rc.2",
     "clear": "^0.0.1",
     "cloudscraper": "^1.4.1",
     "colors": "^1.1.2",
     "inquirer": "^4.0.0",
+    "leven": "^2.1.0",
+    "memfs": "^2.5.9",
+    "unzip-stream": "^0.2.1",
     "window-size": "^1.1.0"
   },
   "devDependencies": {},

@@ -7,7 +7,7 @@ require("colors");
 
 let version, category;
 
-const buttons = require("../config/buttons");
+const locales = require("../config/locales");
 let _categories = {};
 
 Object.keys(curse.categories).map(e => _categories[curse.categories[e].locale] = curse.categories[e].url);
@@ -16,7 +16,7 @@ cli.addScreen("main", function(data, cb) {
 	cli.busy(true);
 	cli.list(null, [
 		{
-			text: buttons.search_mods,
+			text: locales.search_mods,
 			data: "search_mods"
 		}
 	], function(err, data) {
@@ -30,7 +30,7 @@ cli.addScreen("main", function(data, cb) {
 cli.addScreen("versions", function(data, cb) {
 	cli.clear();
 	cli.busy(true);
-	cli.list(buttons.choose_version, Object.keys(curse.versions), function(err, data) {
+	cli.list(locales.choose_version, Object.keys(curse.versions), function(err, data) {
 		version = curse.versions[data];
 
 		cli.busy(false);
@@ -41,11 +41,11 @@ cli.addScreen("versions", function(data, cb) {
 
 cli.addScreen("categories", function(data, cb) {
 	cli.busy(true);
-	cli.list(buttons.choose_category, [...Object.keys(_categories), buttons.back_to_menu], function(err, data) {
+	cli.list(locales.choose_category, [...Object.keys(_categories), locales.back_to_menu], function(err, data) {
 		cli.busy(false);
 		cb();
 		
-		if (data === buttons.back_to_menu) return cli.switchScreen("main", {}, true);
+		if (data === locales.back_to_menu) return cli.switchScreen("main", {}, true);
 
 		category = _categories[data];
 		
@@ -66,17 +66,17 @@ cli.addScreen("mods", function(data, cb) {
 		cli.busy(false);
 		cli.clear();
 		cb();
-		cli.list(buttons.mods, [...results.map(e => ({
+		cli.list(locales.mods, [...results.map(e => ({
 			text: e.title.green + " " + e.description.slice(0, size.width - e.title.length - 5),
 			data: e.rawLink
 		})), {
-			text: buttons.prev_page,
+			text: locales.prev_page,
 			data: "prev_page"
 		}, {
-			text: buttons.next_page,
+			text: locales.next_page,
 			data:"next_page"
 		}, {
-			text: buttons.back_to_categories,
+			text: locales.back_to_categories,
 			data: "back_to_categories"
 		}], function(err, link) {
 			if (link === "prev_page") {
@@ -98,11 +98,11 @@ cli.addScreen("mods", function(data, cb) {
 cli.addScreen("files", function(data, cb) {
 	cli.busy(true);
 
-	console.log("Загружаю...");
+	console.log(locales.downloading);
 
 	curse.getAllFiles(data.link, version, function(err, results) {
 		cli.clear();
-		cli.list(buttons.choose_file, results.map(e => ({
+		cli.list(locales.choose_file, results.map(e => ({
 			text: e.title,
 			data: [e.fileID, e.title]
 		})), function(err, result) {
@@ -116,9 +116,9 @@ cli.addScreen("files", function(data, cb) {
 });
 
 cli.addScreen("mod_download", function(data, cb) {
-	console.log("Получаю ссылку...");
+	console.log(locales.fetching_link);
 	curse.fetchCDNLink(data.link, function(err, link) {
-		console.log("Загружаю:", link);
+		console.log(locales.downloading, link);
 		mxpUtils.downloadFile(link, "../mods/" + mxpUtils.appendJar(data.title), cb);
 	});
 });

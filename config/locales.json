@@ -9,5 +9,7 @@
 	"prev_page": "[<= Пред. стр.]",
 	"next_page": "[След. стр. =>]",
 	"back_to_categories": "[Назад в категории]",
-	"back_to_menu": "[Назад в меню]"
+	"back_to_menu": "[Назад в меню]",
+	"fetching_link": "Получаю ссылку...",
+	"downloading": "Загружаю: "
 }

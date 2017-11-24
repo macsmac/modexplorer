@@ -1,0 +1,21 @@
+{
+	"search_mods": "Поиск модов",
+	"choose_version": "Выберите версию",
+	"choose_category": "Выберите категорию",
+	"mods": "Моды",
+	"page": "Страница",
+	"choose_file": "Выберите файл",
+	"downloading": "Скачиваю",
+	"prev_page": "[<= Пред. стр.]",
+	"next_page": "[След. стр. =>]",
+	"back_to_categories": "[Назад в категории]",
+	"back_to_menu": "[Назад в меню]",
+	"fetching_link": "Получаю ссылку...",
+	"downloading": "Загружаю",
+	"search_btn": "[Строка поиска]",
+	"search": "Поиск",
+	"enter_to_quit": "[Нажмите enter чтобы выйти]",
+	"back": "[Назад]",
+	"signature_check": "Проверка подписей",
+	"start": "[Начать]"
+}

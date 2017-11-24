@@ -51,7 +51,7 @@ const cli = {
 
 		cli._current = screen;
 
-		cli._screens[name](data, cb || cli.prevScreen);
+		process.nextTick(() => cli._screens[name](data, cb || cli.prevScreen));
 	},
 	/**
 	 * Switches to previous screen

@@ -1,6 +1,7 @@
 const assert = require("assert");
 
 const CurseForge = require("../src/curseforge");
+const signature = require("../src/signature");
 
 /*
   CurseForge tests
@@ -34,6 +35,31 @@ describe("CurseForge", function() {
 
 		CurseForge.getCategoryMods(CATEGORY, VERSION, 1, function(err, results) {
 			assert.equal(MODNAME, results[0].title.toLowerCase());
+			cb();
+		});
+	});
+});
+
+/*
+  Signature tests
+*/
+
+describe("Signature", function() {
+	it("Should generate signature from local file", function(cb) {
+		const FILE = "./test/files/test.txt";
+		const SIGNATURE = "6cd3556deb0da54bca060b4c39479839";
+
+		signature.generateMD5(FILE, function(err, signature) {
+			assert.equal(SIGNATURE, signature);
+			cb();
+		});
+	});
+	it("Should generate signature from URL", function(cb) {
+		const URL = "https://pastebin.com/raw/T9qXR9FD";
+		const SIGNATURE = "6cd3556deb0da54bca060b4c39479839";
+
+		signature.URLgenerateMD5(URL, function(err, signature) {
+			assert.equal(SIGNATURE, signature);
 			cb();
 		});
 	});

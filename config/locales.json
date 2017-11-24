@@ -11,5 +11,9 @@
 	"back_to_categories": "[Назад в категории]",
 	"back_to_menu": "[Назад в меню]",
 	"fetching_link": "Получаю ссылку...",
-	"downloading": "Загружаю: "
+	"downloading": "Загружаю",
+	"search_btn": "[Строка поиска]",
+	"search": "Поиск",
+	"enter_to_quit": "[Нажмите enter чтобы выйти]",
+	"back": "[Назад]"
 }

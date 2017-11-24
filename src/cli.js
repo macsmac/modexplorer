@@ -58,32 +58,38 @@ const cli = {
 	 * @param {function} cb - Called when screen calls callback, 
 	                          if not present will switch to previous screen
 	                          if true will just end
+	 * @param {boolean} save - If need to save to screen hustory
 	 */
-	switchScreen: function(name, data, cb) {
+	switchScreen: function(name, data, cb, save = true) {
 		cli.clear();
 
 		if (cli._busy) throw new Error("Switching busy screen");
 
+		cb = typeof cb !== "boolean" ? cb || cli.prevScreen : dummy;
+
 		const screen = { name, data, cb };
+		const fnscreen = cli._screens[name];
 
 		if (cli._history.length > 5) cli._history.pop();
-		cli._history.unshift(screen);
+		if (save) cli._history.unshift(screen);
 
 		cli._current = screen;
 
-		process.nextTick(() => cli._screens[name](data, typeof cb !== "boolean" ? cb || cli.prevScreen : dummy));
+		process.nextTick(() => fnscreen(data, cb));
 	},
 	/**
 	 * Switches to previous screen
 	 * @param {function} cb - Previous screen callback
 	 */
-	prevScreen: function(cb = dummy) {
+	prevScreen: function(num = 1, cb = dummy) {
 		if (cli._history.length === 1) return cb();
 
-		cli._history.shift();
+		for (let i = 0; i < num; i++) 
+			cli._history.shift();
+
 		const screen = cli._history[0];
 
-		cli.switchScreen(screen.name, screen.data, cb || screen.cb);
+		cli.switchScreen(screen.name, screen.data, screen.cb || cb, false);
 	},
 	/**
 	 * Sets if screen is busy or not
@@ -95,6 +101,7 @@ const cli = {
 	clear: function() {
 		console.log("\n".repeat(size.height + 1));
 		clear();
+		console.log("[" + cli._history.map(e => e.name + "(" + e.cb.name + ")").join(" ") + "]");
 	}
 }
 

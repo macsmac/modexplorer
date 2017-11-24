@@ -41,11 +41,12 @@ cli.addScreen("versions", function(data, cb) {
 
 cli.addScreen("categories", function(data, cb) {
 	cli.busy(true);
-	cli.list(locales.choose_category, [...Object.keys(_categories), locales.back_to_menu], function(err, data) {
+	cli.list(locales.choose_category, [locales.search_btn, ...Object.keys(_categories), locales.back_to_menu], function(err, data) {
 		cli.busy(false);
 		cb();
 		
 		if (data === locales.back_to_menu) return cli.switchScreen("main", {}, true);
+		else if (data === locales.search_btn) return cli.switchScreen("search");
 
 		category = _categories[data];
 		
@@ -53,7 +54,7 @@ cli.addScreen("categories", function(data, cb) {
 			category: category,
 			version: version,
 			page: 1
-		}, true);
+		});
 	});
 });
 
@@ -62,10 +63,8 @@ cli.addScreen("mods", function(data, cb) {
 
 	console.log("Загружаю...");
 
-	curse.getCategoryMods(data.category, data.version, data.page, function(err, results) {
-		cli.busy(false);
+	function handlerFn(err, results) {
 		cli.clear();
-		cb();
 		cli.list(locales.mods, [...results.map(e => ({
 			text: e.title.green + " " + e.description.slice(0, size.width - e.title.length - 5),
 			data: e.rawLink
@@ -76,23 +75,27 @@ cli.addScreen("mods", function(data, cb) {
 			text: locales.next_page,
 			data:"next_page"
 		}, {
-			text: locales.back_to_categories,
-			data: "back_to_categories"
+			text: locales.back,
+			data: "back"
 		}], function(err, link) {
+			cli.busy(false);
 			if (link === "prev_page") {
 				data.page--;
-				cli.switchScreen("mods", data, true);
+				cli.switchScreen("mods", data, cb);
 			} else if (link === "next_page") {
 				data.page++;
-				cli.switchScreen("mods", data, true);
-			} else if (link === "back_to_categories") {
-				cli.switchScreen("categories", {}, true);
+				cli.switchScreen("mods", data, cb);
+			} else if (link === "back") {
+				console.log(cb);
+				cb();
 			} else {
-				cli.switchScreen("files", { link }, (result) => 
-					cli.switchScreen("mod_download", result, () => cli.switchScreen("mods", data, cb)));
+				cli.switchScreen("files", { link }, (result) => cli.switchScreen("mod_download", result, () => cli.prevScreen(2)));
 			}
 		});
-	});
+	}
+
+	if (!data.search) curse.getCategoryMods(data.category, data.version, data.page, handlerFn);
+	else curse.searchMod(data.search, data.page, data.version, null, handlerFn);
 });
 
 cli.addScreen("files", function(data, cb) {
@@ -113,13 +116,26 @@ cli.addScreen("files", function(data, cb) {
 			});
 		});
 	});
-});
+}, false);
 
 cli.addScreen("mod_download", function(data, cb) {
 	console.log(locales.fetching_link);
 	curse.fetchCDNLink(data.link, function(err, link) {
-		console.log(locales.downloading, link);
+		console.log(locales.downloading + ":", link);
 		mxpUtils.downloadFile(link, "../mods/" + mxpUtils.appendJar(data.title), cb);
+	});
+}, false);
+
+cli.addScreen("search", function(data, cb) {
+	console.log(locales.enter_to_quit.gray);
+	cli.input(locales.search, function(err, data) {
+		if (data.trim() === "") return cb();
+
+		cli.switchScreen("mods", {
+			page: 1,
+			search: data,
+			version
+		}, cb);
 	});
 });
 

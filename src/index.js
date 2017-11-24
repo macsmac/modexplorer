@@ -86,7 +86,6 @@ cli.addScreen("mods", function(data, cb) {
 				data.page++;
 				cli.switchScreen("mods", data, cb);
 			} else if (link === "back") {
-				console.log(cb);
 				cb();
 			} else {
 				cli.switchScreen("files", { link }, (result) => cli.switchScreen("mod_download", result, () => cli.prevScreen(2)));

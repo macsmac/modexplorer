@@ -101,7 +101,6 @@ const cli = {
 	clear: function() {
 		console.log("\n".repeat(size.height + 1));
 		clear();
-		console.log("[" + cli._history.map(e => e.name + "(" + e.cb.name + ")").join(" ") + "]");
 	}
 }
 

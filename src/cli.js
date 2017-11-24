@@ -1,4 +1,6 @@
-const inquirer = require("inquirer");
+const inquirer = require("inquirer"),
+      clear = require("clear"),
+      size = require("window-size");
 
 function dummy(){}
 
@@ -15,15 +17,16 @@ const cli = {
 	 */
 	list: function(message, data, cb) {
 		inquirer.prompt([{
-			choices: data.map(e => e.text),
+			choices: typeof data[0] === "object" ? data.map(e => e.text) : data,
 			type: "list",
 			prefix: "",
 			suffix: "",
 			name: "data",
-			message: message || " "
+			message: message || " ",
+			pageSize: size.height - 4
 		}]).then(function(result) {
-			const btn = data.find(e => e.text === result.data);
-			process.nextTick(() => cb(null, btn));
+			const btn = typeof data[0] === "object" ? data.find(e => e.text === result.data) : result;
+			process.nextTick(() => cb(null, btn.data));
 		}).catch(cb);
 	},
 	/**
@@ -40,9 +43,12 @@ const cli = {
 	 * @param {any} data - Data that will be given to screen
 	 * @param {function} cb - Called when screen calls callback, 
 	                          if not present will switch to previous screen
+	                          if true will just end
 	 */
 	switchScreen: function(name, data, cb) {
-		if (cli._busy) return cb(new Error("Switching busy screen"));
+		cli.clear();
+
+		if (cli._busy) throw new Error("Switching busy screen");
 
 		const screen = { name, data, cb };
 
@@ -51,7 +57,7 @@ const cli = {
 
 		cli._current = screen;
 
-		process.nextTick(() => cli._screens[name](data, cb || cli.prevScreen));
+		process.nextTick(() => cli._screens[name](data, typeof cb !== "boolean" ? cb || cli.prevScreen : dummy));
 	},
 	/**
 	 * Switches to previous screen
@@ -71,6 +77,10 @@ const cli = {
 	 */
 	busy: function(val) {
 		cli._busy = val;
+	},
+	clear: function() {
+		console.log("\n".repeat(size.height + 1));
+		clear();
 	}
 }
 

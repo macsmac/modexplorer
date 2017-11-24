@@ -1,5 +1,6 @@
 const fs = require("fs"),
-	  https = require("https");
+	  https = require("https"),
+	  crypto = require("crypto");
 
 const mxpUtils = {
 	downloadFile: function(link, dest, cb) {
@@ -15,6 +16,9 @@ const mxpUtils = {
 	},
 	appendJar: function(file) {
 		return file + (file.endsWith(".jar") ? "" : ".jar");
+	},
+	md5: function(str) {
+		return crypto.createHash("md5").update(str).digest("hex");
 	}
 }
 

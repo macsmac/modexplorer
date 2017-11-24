@@ -4,6 +4,7 @@
   "description": "Mod explorer for CurseForge",
   "main": "src/cli.js",
   "dependencies": {
+    "assert": "^1.4.1",
     "async": "^2.6.0",
     "cheerio": "^1.0.0-rc.2",
     "clear": "^0.0.1",
@@ -12,12 +13,13 @@
     "inquirer": "^4.0.0",
     "leven": "^2.1.0",
     "memfs": "^2.5.9",
+    "mocha": "^4.0.1",
     "unzip-stream": "^0.2.1",
     "window-size": "^1.1.0"
   },
   "devDependencies": {},
   "scripts": {
-    "test": ""
+    "test": "node ./node_modules/mocha/bin/_mocha --no-timeouts"
   },
   "repository": {
     "type": "git",

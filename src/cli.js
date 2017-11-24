@@ -30,6 +30,20 @@ const cli = {
 		}).catch(cb);
 	},
 	/**
+	 * Shows text input
+	 * @param {string} message - Message
+	 * @param {function} cb
+	 */
+	input: function(message, cb) {
+		inquirer.prompt([{
+			type: "input",
+			prefix: "",
+			suffix: "",
+			name: "input",
+			message: message || " "
+		}]).then(r => cb(null, r.input)).catch(cb);
+	},
+	/**
 	 * Adds cli screen
 	 * @param {string} name - Screen name
 	 * @param {funcion} fn - Screen handler
@@ -67,7 +81,7 @@ const cli = {
 		if (cli._history.length === 1) return cb();
 
 		cli._history.shift();
-		const screen = cli._history[cli._history.length - 1];
+		const screen = cli._history[0];
 
 		cli.switchScreen(screen.name, screen.data, cb || screen.cb);
 	},

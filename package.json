@@ -13,6 +13,7 @@
     "inquirer": "^4.0.0",
     "memfs": "^2.5.9",
     "mocha": "^4.0.1",
+    "opn": "^5.1.0",
     "unzip-stream": "^0.2.1",
     "window-size": "^1.1.0"
   },

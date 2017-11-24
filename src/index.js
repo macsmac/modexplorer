@@ -1,7 +1,17 @@
+require("./setup");
+
 const cli = require("./cli"),
       mxpUtils = require("./mxputils"),
       curse = require("./curseforge"),
-      size = require("window-size");
+      size = require("window-size"),
+      async = require("async"),
+      opn = require("opn"),
+      fs = require("fs"),
+      zip = require("./unzip"),
+      signature = require("./signature");
+
+const MXP_URL = "https://ru-minecraft.ru/fayly-dlya-minecraft/49994-modexplorer-kachaem-mody-iz-konsolki.html";
+const MXP_LOGO = fs.readFileSync("../config/welcometext.txt").toString();
 
 require("colors");
 
@@ -13,17 +23,30 @@ let _categories = {};
 Object.keys(curse.categories).map(e => _categories[curse.categories[e].locale] = curse.categories[e].url);
 
 cli.addScreen("main", function(data, cb) {
+	console.log(MXP_LOGO.green);
+	console.log("=".repeat(size.width));
 	cli.busy(true);
 	cli.list(null, [
 		{
 			text: locales.search_mods,
 			data: "search_mods"
+		}, {
+			text: locales.signature_check,
+			data: "signature_check"
+		}, {
+			text: "Типа справочка",
+			data: "help"
 		}
 	], function(err, data) {
 		cli.busy(false);
 		cb();
 
 		if (data === "search_mods") cli.switchScreen("versions", {}, true);
+		else if (data === "signature_check") cli.switchScreen("signature_check", {}, true);
+		else if (data === "help") {
+			cli.switchScreen("main", {}, true);
+			opn(MXP_URL);
+		}
 	});
 });
 
@@ -126,6 +149,8 @@ cli.addScreen("mod_download", function(data, cb) {
 }, false);
 
 cli.addScreen("search", function(data, cb) {
+	console.log(MXP_LOGO.green);
+	console.log("=".repeat(size.width));
 	console.log(locales.enter_to_quit.gray);
 	cli.input(locales.search, function(err, data) {
 		if (data.trim() === "") return cb();
@@ -135,6 +160,62 @@ cli.addScreen("search", function(data, cb) {
 			search: data,
 			version
 		}, cb);
+	});
+});
+
+cli.addScreen("signature_check", function(data, cb) {
+	console.log(MXP_LOGO.green);
+	console.log("=".repeat(size.width));
+	cli.list(null, [ locales.start, locales.back_to_menu ], function(err, data) {
+		if (data === locales.back_to_menu) return cli.switchScreen("main", {}, true);
+
+		cb();
+		cli.switchScreen("signature_check_start", {}, true);
+	});
+});
+
+cli.addScreen("signature_check_start", function(data, cb) {
+	/*
+	TODO: Add locales
+	*/
+	console.log("== Проверка подписей ==".green);
+	console.log("Читаю директорию");
+	fs.readdir("../mods", function(err, files) {
+		files = files.filter(e => e.endsWith(".jar"));
+		console.log("Нашел", files.length, "файлов");
+
+		console.log("Начинаю проверку подписей");
+		// async.mapSeries
+		async.eachSeries(files, function(file, cb) {
+			zip.getFile("../mods/" + file, ["mcmod.info", "cccmod.info"], function(content) {
+				if (content != undefined) content = content.toString();
+
+				if (!content) return cb(console.log("Не нашел mcmod.info у", file, "- пропускаем"));
+
+				let modinfo = JSON.parse(content.replace(/(\r\n|\n|\r)/gm,""));
+					
+				if (modinfo[0]) modinfo = modinfo[0];
+				else modinfo = modinfo.modList[0];
+
+				if (!modinfo.name) return cb(console.log("Нет названия у", file, "- сжигаем на костре"));
+
+				curse.searchMod(modinfo.name, 1, curse.versions[modinfo.mcversion], modinfo.version, function(err, link) {
+					if (!link || !link.endsWith(".jar")) return cb(console.log("Не смог получить ссылку на CDN"));
+
+					signature.generateMD5("../mods/" + file, function(err, localSignature) {
+						signature.URLgenerateMD5(link, function(err, curseSignature) {
+							if (localSignature === curseSignature) {
+								console.log(file, "- Подпись верна".green);
+							} else {
+								console.log(file.bgWhite.red + " - Подпись неверна".bgWhite.red);
+							}
+
+							cb();
+						});
+					});
+				});
+			});
+		}/* , function() {} */);
 	});
 });
 

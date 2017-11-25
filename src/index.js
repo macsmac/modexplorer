@@ -8,7 +8,9 @@ const cli = require("./cli"),
       opn = require("opn"),
       fs = require("fs"),
       zip = require("./unzip"),
-      signature = require("./signature");
+      signature = require("./signature"),
+      google = require("google"),
+      leven = require("leven");
 
 const MXP_URL = "https://ru-minecraft.ru/fayly-dlya-minecraft/49994-modexplorer-kachaem-mody-iz-konsolki.html";
 const MXP_LOGO = fs.readFileSync("../config/welcometext.txt").toString();
@@ -200,19 +202,37 @@ cli.addScreen("signature_check_start", function(data, cb) {
 				if (!modinfo.name) return cb(console.log("Нет названия у", file, "- сжигаем на костре"));
 
 				curse.searchMod(modinfo.name, 1, curse.versions[modinfo.mcversion], modinfo.version, function(err, link) {
-					if (!link || !link.endsWith(".jar")) return cb(console.log("Не смог получить ссылку на CDN"));
+					if (!link || !link.endsWith(".jar")) {
+						google("curseforge " + modinfo.name, function(err, res) {
+							const project = res.links.find(e => 
+								leven(e.link.split("/").pop().toLowerCase(), modinfo.name.toLowerCase()) < 5);
+							if (!project) return console.log("Не смог найти", file, "на CurseForge");
 
-					signature.generateMD5("../mods/" + file, function(err, localSignature) {
-						signature.URLgenerateMD5(link, function(err, curseSignature) {
-							if (localSignature === curseSignature) {
-								console.log(file, "- Подпись верна".green);
-							} else {
-								console.log(file.bgWhite.red + " - Подпись неверна".bgWhite.red);
-							}
+							const rawLink = "https://curseforge.com/minecraft/mc-mods/" + project.link.split("/").pop();
 
-							cb();
+							curse.getAllFiles(rawLink, curse.versions[modinfo.mcversion], function(err, files) {
+								const tfile = files.find(e => e.title.toLowerCase().indexOf(modinfo.version.toLowerCase()) !== -1);
+
+								if (!tfile) return console.log("Не смог найти нужную версию", file);
+
+								curse.fetchCDNLink(rawLink + "/download/" + tfile.fileID, (e, l) => check(l));
+							});
 						});
-					});
+					} else check(link);
+
+					function check(link) {
+						signature.generateMD5("../mods/" + file, function(err, localSignature) {
+							signature.URLgenerateMD5(link, function(err, curseSignature) {
+								if (localSignature === curseSignature) {
+									console.log(file, "- Подпись верна".green);
+								} else {
+									console.log(file.bgWhite.red + " - Подпись неверна".bgWhite.red);
+								}
+
+								cb();
+							});
+						});
+					}
 				});
 			});
 		}/* , function() {} */);

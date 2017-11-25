@@ -211,8 +211,7 @@ cli.addScreen("signature_check_start", function(data, cb) {
 							const rawLink = "https://curseforge.com/minecraft/mc-mods/" + project.link.split("/").pop();
 
 							curse.getAllFiles(rawLink, curse.versions[modinfo.mcversion], function(err, files) {
-								const tfile = files.find(e => 
-									e.title.endsWith(".jar") && e.title.toLowerCase().indexOf(modinfo.version.toLowerCase()) !== -1);
+								const tfile = files.find(e => e.title.toLowerCase().indexOf(modinfo.version.toLowerCase()) !== -1);
 
 								if (!tfile) return console.log("Не смог найти нужную версию", file);
 

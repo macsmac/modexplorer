@@ -216,7 +216,7 @@ cli.addScreen("signature_check_start", function(data, cb) {
 
 								if (!tfile) return console.log("Не смог найти нужную версию", file);
 
-								curse.fetchCDNLink(rawLink + "/download/" + tfile.projectID, (e, l) => check(l));
+								curse.fetchCDNLink(rawLink + "/download/" + tfile.fileID, (e, l) => check(l));
 							});
 						});
 					} else check(link);

@@ -2,7 +2,7 @@ const fs = require("fs");
 const pkg = require("../package.json");
 
 try {
-	Object.keys(pkg).forEach(require.resolve);
+	Object.keys(pkg.dependencies).forEach(require.resolve);
 } catch (e) {
 	console.log("Ставлю зависимости");
 	require("child_process").execSync("npm i");

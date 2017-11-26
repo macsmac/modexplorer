@@ -22,7 +22,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/_mocha --no-timeouts"
+    "test": "node ./node_modules/mocha/bin/_mocha --no-timeouts",
+    "build": "node ./node_modules/gulp/bin/gulp"
   },
   "repository": {
     "type": "git",

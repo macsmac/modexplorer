@@ -9,6 +9,7 @@ try {
 	console.log("Создаю папки");
 	try {
 		require("fs").mkdirSync("../mods");
+		require("fs").mkdirSync("../cache");
 	} catch(e) {}
 	console.log("Теперь можете запускать MXP");
 	process.exit(0);

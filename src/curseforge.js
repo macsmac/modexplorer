@@ -56,11 +56,14 @@ const CurseForge = {
 	fetchProjectFiles: function($) {
 		if (!$) return;
 
+		const downloadCounts = $(".table__content.file__download");
+
 		return $(".button.button--download.download-button.mg-r-05").map(function(i, e) {
 			const val = JSON.parse(e.attribs["data-action-value"]);
 			return { 
 				title: val.FileName, 
-				fileID: val.ProjectFileID 
+				fileID: val.ProjectFileID,
+				downloads: parseInt(downloadCounts[i].children[0].data.match(/\d/g).join(""))
 			};
 		});
 	},

@@ -130,7 +130,7 @@ cli.addScreen("files", function(data, cb) {
 	curse.getAllFiles(data.link, version, function(err, results) {
 		cli.clear();
 		cli.list(locales.choose_file, results.map(e => ({
-			text: e.title,
+			text: ("[" + e.downloads + "] ").green + e.title,
 			data: [e.fileID, e.title]
 		})), function(err, result) {
 			cli.busy(false);

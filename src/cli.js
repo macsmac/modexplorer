@@ -34,14 +34,14 @@ const cli = {
 	 * @param {string} message - Message
 	 * @param {function} cb
 	 */
-	input: function(message, cb) {
-		inquirer.prompt([{
+	input: function(message, cb, ex) {
+		inquirer.prompt([Object.assign({
 			type: "input",
 			prefix: "",
 			suffix: "",
 			name: "input",
 			message: message || " "
-		}]).then(r => cb(null, r.input)).catch(cb);
+		}, ex || {})]).then(r => cb(null, r.input)).catch(cb);
 	},
 	/**
 	 * Adds cli screen

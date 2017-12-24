@@ -10,7 +10,9 @@ const cli = require("./cli"),
       zip = require("./unzip"),
       signature = require("./signature"),
       google = require("google"),
-      leven = require("leven");
+      leven = require("leven"),
+      settings = require("./settings"),
+      path = require("path");
 
 const MXP_URL = "https://ru-minecraft.ru/fayly-dlya-minecraft/49994-modexplorer-kachaem-mody-iz-konsolki.html";
 const MXP_LOGO = fs.readFileSync("../config/welcometext.txt").toString();
@@ -38,6 +40,9 @@ cli.addScreen("main", function(data, cb) {
 		}, {
 			text: "Типа справочка",
 			data: "help"
+		}, {
+			text: "Настройки",
+			data: "settings"
 		}
 	], function(err, data) {
 		cli.busy(false);
@@ -45,6 +50,7 @@ cli.addScreen("main", function(data, cb) {
 
 		if (data === "search_mods") cli.switchScreen("versions", {}, true);
 		else if (data === "signature_check") cli.switchScreen("signature_check", {}, true);
+		else if (data === "settings") cli.switchScreen("settings", {}, true);
 		else if (data === "help") {
 			cli.switchScreen("main", {}, true);
 			opn(MXP_URL);
@@ -129,11 +135,24 @@ cli.addScreen("files", function(data, cb) {
 
 	curse.getAllFiles(data.link, version, function(err, results) {
 		cli.clear();
+
+		cli.busy(false);
+
+		if (settings.get("downloadOptimal") === "1") {
+			const file = results.sort((a, b) => b.downloads - a.downloads)[0];
+
+			cb({
+				link: data.link + "/download/" + file.fileID,
+				title: file.title
+			});
+
+			return;
+		}
+
 		cli.list(locales.choose_file, results.map(e => ({
 			text: ("[" + e.downloads + "] ").green + e.title,
 			data: [e.fileID, e.title]
 		})), function(err, result) {
-			cli.busy(false);
 			cb({
 				link: data.link + "/download/" + result[0],
 				title: result[1]
@@ -146,7 +165,7 @@ cli.addScreen("mod_download", function(data, cb) {
 	console.log(locales.fetching_link);
 	curse.fetchCDNLink(data.link, function(err, link) {
 		console.log(locales.downloading + ":", link);
-		mxpUtils.downloadFile(link, "../mods/" + mxpUtils.appendJar(data.title), cb);
+		mxpUtils.downloadFile(link, path.join(settings.get("modsPath"), mxpUtils.appendJar(data.title)), cb);
 	});
 }, false);
 
@@ -162,6 +181,33 @@ cli.addScreen("search", function(data, cb) {
 			search: data,
 			version
 		}, cb);
+	});
+});
+
+cli.addScreen("settings", function(data, cb) {
+	const fields = [["Путь к папке модов", "modsPath"], ["Выбирать версию мода для загрузки автоматически (0 или 1)", "downloadOptimal"]];
+
+	cli.list("Настройки", [...fields.map(e => ({ 
+		text: e[0].green + " [" + settings.get(e[1]) + "]",
+		data: e[1]
+	})), {
+		text: "[Сохранить]",
+		data: "save"
+	}], function(err, field) {
+		cli.clear();
+
+		if (field === "save") {
+			settings.update(() => cli.switchScreen("main", {}, true));
+			return;
+		}
+
+		cli.input("Изменение параметра: " + field, function(err, data) {
+			settings.set(field, data);
+
+			cli.switchScreen("settings", {}, true);
+		}, {
+			"default": settings.get(field)
+		});
 	});
 });
 
@@ -182,14 +228,14 @@ cli.addScreen("signature_check_start", function(data, cb) {
 	*/
 	console.log("== Проверка подписей ==".green);
 	console.log("Читаю директорию");
-	fs.readdir("../mods", function(err, files) {
+	fs.readdir(settings.get("modsPath"), function(err, files) {
 		files = files.filter(e => e.endsWith(".jar"));
 		console.log("Нашел", files.length, "файлов");
 
 		console.log("Начинаю проверку подписей");
 		// async.mapSeries
 		async.eachSeries(files, function(file, cb) {
-			zip.getFile("../mods/" + file, ["mcmod.info", "cccmod.info"], function(content) {
+			zip.getFile(path.join(settings.get("modsPath"), file), ["mcmod.info", "cccmod.info"], function(content) {
 				if (content != undefined) content = content.toString();
 
 				if (!content) return cb(console.log("Не нашел mcmod.info у", file, "- пропускаем"));
@@ -221,7 +267,7 @@ cli.addScreen("signature_check_start", function(data, cb) {
 					} else check(link);
 
 					function check(link) {
-						signature.generateMD5("../mods/" + file, function(err, localSignature) {
+						signature.generateMD5(path.join(settings.get("modsPath"), file), function(err, localSignature) {
 							signature.URLgenerateMD5(link, function(err, curseSignature) {
 								if (localSignature === curseSignature) {
 									console.log(file, "- Подпись верна".green);
